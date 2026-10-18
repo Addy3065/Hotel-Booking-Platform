@@ -1,0 +1,95 @@
+<% layout("/layouts/boilerplate")%>
+
+<body>
+  <h2 style="margin-bottom: 3rem">Welcome To WandersHub</h2>
+  <div class="row">
+    <div class="col-8 offset-2">
+      <h4>Add Your Property's Details</h4>
+      <form
+        method="POST"
+        action="/listings"
+        novalidate
+        class="needs-validation"
+        enctype="multipart/form-data"
+      >
+        <div style="margin-top: 1rem">
+          <label for="title" class="form-label">Title</label>
+          <input
+            class="Add_details form-control"
+            placeholder="Add Your Property Name"
+            name="list[title]"
+            type="text"
+            required
+          />
+          <div class="valid-feedback">Accepted</div>
+        </div>
+
+        <BR /><br />
+        <div>
+          <label for="description" class="form-label">Description</label>
+          <input
+            class="Add_details form-control"
+            placeholder="Add Your Property Description"
+            name="list[description]"
+            type="text"
+            required
+          />
+          <div class="valid-feedback">Accepted</div>
+        </div>
+        <!-- image file upload  -->
+        <div>
+          <label for="image" class="form-label">upload image</label>
+          <input class="form-control" type="fike" name="list[image]" />
+        </div>
+        <br /><br />
+        <div>
+          <label for="price" class="form-label">Price</label>
+          <input
+            id="price"
+            class="Add_details form-control"
+            placeholder="Add Your Property Price Per Night"
+            name="list[price]"
+            inputmode="numeric"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+          />
+          <div class="invalid-feedback">Enter Non Negative Number</div>
+        </div>
+        <br /><br />
+        <div>
+          <label for="location" class="form-label">Address</label>
+          <input
+            class="Add_details form-control"
+            placeholder="Add Your Property Address"
+            name="list[location]"
+            type="text"
+            required
+          />
+          <div class="invalid-feedback">Enter Location</div>
+        </div>
+        <br /><br />
+        <div>
+          <label for="country" class="form-label">Country</label>
+          <input
+            class="Add_details form-control"
+            placeholder="Add Your Country"
+            name="list[country]"
+            type="text"
+            required
+          />
+          <div class="invalid-feedback">Enter Country</div>
+        </div>
+        <br /><br />
+        <div
+          class="d-flex justify-content-between align-items-center"
+          style="margin-bottom: 5rem"
+        >
+          <button class="btn btn-primary">Add Property</button>
+          <!-- ADD a button to upload images of properties -->
+        </div>
+      </form>
+    </div>
+  </div>
+</body>

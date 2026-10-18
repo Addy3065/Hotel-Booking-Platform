@@ -1,0 +1,95 @@
+<% layout("/layouts/boilerplate")%>
+<body>
+  <h2 style="margin-bottom: 3rem">Property:<%= list.title%></h2>
+  <div class="row">
+    <div class="col-8 offset-2">
+      <h3>Edit Your Property</h3>
+      <form
+        method="POST"
+        action="/listings/<%=list._id%>?_method=PUT"
+        class="needs-validation"
+        novalidate
+        enctype="multipart/form-data"
+      >
+        <div>
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            id="description"
+            name="list[description]"
+            class="Add_details form-control"
+            required
+          >
+<%= list.description %></textarea
+          >
+          <div class="valid-feedback">Accepted</div>
+          <div class="invalid-feedback">Please enter a description.</div>
+        </div>
+
+        <div>
+          <h4>Original Image</h4>
+          <img src="<%= originalnlImageUrl %>" alt="" />
+        </div>
+
+        <div>
+          <label for="image" class="form-label">Image Link </label>
+          <input type="file" name="list[image]" class="form-control" />
+          <div class="invalid-feedback">please enter valid link</div>
+        </div>
+        <br /><br />
+        <div>
+          <label for="price" class="form-label">Price</label>
+          <input
+            id="price"
+            class="Add_details form-control"
+            value="<%= list.price %>"
+            name="list[price]"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+          />
+          <div class="valid-feedback">Accepted</div>
+          <div class="invalid-feedback">
+            Please enter a valid, non-negative price.
+          </div>
+        </div>
+        <br /><br />
+        <div>
+          <label for="location" class="form-label">Location</label>
+          <input
+            id="location"
+            class="Add_details form-control"
+            value="<%= list.location %>"
+            name="list[location]"
+            type="text"
+            required
+          />
+          <div class="valid-feedback">Accepted</div>
+          <div class="invalid-feedback">Please enter a location.</div>
+        </div>
+        <br /><br />
+        <div>
+          <label for="country" class="form-label">Country</label>
+          <input
+            id="country"
+            class="Add_details form-control"
+            value="<%= list.country %>"
+            name="list[country]"
+            type="text"
+            required
+          />
+          <div class="valid-feedback">Accepted</div>
+          <div class="invalid-feedback">Please enter a country.</div>
+        </div>
+        <br /><br />
+        <div
+          class="d-flex justify-content-between align-items-center"
+          style="margin-bottom: 5rem"
+        >
+          <button class="btn btn-primary">Edit Property</button>
+          <!-- ADD a button to upload images of properties -->
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
