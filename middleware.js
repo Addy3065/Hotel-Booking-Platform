@@ -1,5 +1,5 @@
 const Listing = require("./models/listings");
-const review = require("./models/review.js");
+const Review = require("./models/review.js");
 const { listingSchema, reviewSchema } = require("./schema.js");
 const expressError = require("./utils/expressError.js");
 
@@ -22,7 +22,11 @@ module.exports.saveRedirectUrl = (req, res, next) => {
 module.exports.isOwner = async (req, res, next) => {
   let { id } = req.params;
   let list = await Listing.findById(id);
-  if (!list.owner.equals(res.locals.currentUser._id)) {
+  if (!list) {
+    req.flash("error", "Listing Does Not Exist!");
+    return res.redirect("/listings");
+  }
+  if (!list.owner || !list.owner.equals(res.locals.currentUser._id)) {
     req.flash("error", "AUKAT MAI ");
     return res.redirect(`/listings/${id}`);
   }
@@ -30,8 +34,12 @@ module.exports.isOwner = async (req, res, next) => {
 };
 module.exports.isReviewAuthor = async (req, res, next) => {
   let { id, reviewId } = req.params;
-  let list = await Review.findById(reviewId);
-  if (!review.owner.equals(res.locals.currentUser._id)) {
+  let review = await Review.findById(reviewId);
+  if (!review) {
+    req.flash("error", "Review Does Not Exist!");
+    return res.redirect(`/listings/${id}`);
+  }
+  if (!review.author || !review.author.equals(res.locals.currentUser._id)) {
     req.flash("error", "AUKAT MAI ");
     return res.redirect(`/listings/${id}`);
   }

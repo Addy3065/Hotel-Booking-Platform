@@ -1,13 +1,14 @@
 <%layout("/layouts/boilerplate") %>
+<% const hasMap = list.geometry && list.geometry.coordinates && list.geometry.coordinates.length === 2; %>
 <script>
-  const mapToken=  "<%= process.env.MAP_TOKEN%> ";
-  const cordinates = <%- JSON.stringify(list.geometry.coordinates)%>
+  const mapToken = "<%= process.env.MAP_TOKEN || '' %>";
+  const coordinates = <%- JSON.stringify(hasMap ? list.geometry.coordinates : null) %>;
 </script>
 <body>
   <div class="row mt-4">
     <div class="col-8 offset-2">
       <h3><%= list.title %></h3>
-      <i><%=list.owner.username %></i>
+      <i>Owned by <%= list.owner ? list.owner.username : "Unknown" %></i>
       <div class="card col-12 listing-card mt-3">
         <img
           src="<%= list.image.url %>"
@@ -30,7 +31,7 @@
 
       <br />
 
-      <% if(currentUser && currentUser.equals(list.owner)){%>
+      <% if(currentUser && list.owner && currentUser._id.equals(list.owner._id)){%>
       <div class="d-flex gap-2 mb-4">
         <form method="get" action="/listings/<%= list._id %>/edit">
           <button class="btn btn-primary">Edit</button>
@@ -45,26 +46,34 @@
 
 
       <!-- REVIEWS -->
-      
+
       <div>
-         <% id(currentUser){%>
+        <% if(currentUser){ %>
         <h4>Leave a review</h4>
         <form
-          action="/listings/<%=list.id %>/reviews"
+          action="/listings/<%= list._id %>/reviews"
           method="post"
           class="mb-3 needs-validation"
           novalidate
         >
           <div class="mb-3 mt-3">
-            <label for="rating" class="form-label">Rating</label>
-            <input
-              type="range"
-              min="1"
-              max="5"
-              id="rating"
-              name="review[rating]"
-              class="form-range"
-            />
+            <label class="form-label d-block">Rating</label>
+            <!-- star rating input: radios are laid out in reverse so CSS can highlight every star up to the hovered/checked one -->
+            <fieldset class="star-rating">
+              <% for (let i = 5; i >= 1; i--) { %>
+              <input
+                type="radio"
+                id="rate<%= i %>"
+                name="review[rating]"
+                value="<%= i %>"
+                required
+              />
+              <label for="rate<%= i %>" title="<%= i %> star<%= i > 1 ? 's' : '' %>"
+                ><i class="fa-solid fa-star"></i
+              ></label>
+              <% } %>
+            </fieldset>
+            <div class="invalid-feedback star-feedback">Please select a rating!</div>
           </div>
           <div class="mb-3 mt-3">
             <label for="comment" class="form-label">Comments</label>
@@ -72,7 +81,7 @@
               name="review[comment]"
               id="comment"
               cols="30"
-              rows="10"
+              rows="5"
               class="form-control"
               required
             ></textarea>
@@ -81,40 +90,54 @@
 
           <button class="btn btn-outline-dark">Post</button>
         </form>
-        <%}%>
-
         <hr />
-        <% if(list.reviews.length >0){ %>
-        <div class="row">
-          <h4>All Reviews</h4>
-          <% for(review of list.reviews){%>
-            <div class="card col-5 mb-3 ms-3">
-              <div class="card-body">
-               <h5 class="card-title">Add username here </h5>
-               <p class="card-text"><%=review.comment%></p>
-               <p class="card-text">
-                <%= "⭐".repeat(review.rating) %> (<%= review.rating %>/5)
-               </p>
-               </div>
-               <form method="post" action="/listings/<%=list._id%>/reviews/<%=review._id%>?_method=Delete">
-                  <button class="btn btn-sm btn-dark mt-3 mb-2">Delete</button>
-                </form>
-            </div>
-          <%}%>
-        </div>
-        <%}%> 
+        <% } %>
 
-        
+        <% if(list.reviews.length > 0){ %>
+        <% const avgRating = list.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / list.reviews.length; %>
+        <div class="row">
+          <h4>
+            All Reviews
+            <span class="avg-rating ms-2">
+              <i class="fa-solid fa-star"></i> <%= avgRating.toFixed(1) %>/5
+              <small class="text-muted">(<%= list.reviews.length %> review<%= list.reviews.length > 1 ? "s" : "" %>)</small>
+            </span>
+          </h4>
+          <% for(let review of list.reviews){ %>
+          <div class="card review-card col-5 mb-3 ms-3">
+            <div class="card-body">
+              <h5 class="card-title">@<%= review.author ? review.author.username : "Unknown user" %></h5>
+              <p class="star-display mb-1" title="Rated <%= review.rating %> out of 5">
+                <% for (let i = 1; i <= 5; i++) { %>
+                <i class="fa-<%= i <= review.rating ? 'solid' : 'regular' %> fa-star"></i>
+                <% } %>
+                <span class="ms-1 text-muted">(<%= review.rating %>/5)</span>
+              </p>
+              <p class="card-text"><%= review.comment %></p>
+            </div>
+            <% if(currentUser && review.author && currentUser._id.equals(review.author._id)){ %>
+            <form method="post" action="/listings/<%= list._id %>/reviews/<%= review._id %>?_method=DELETE">
+              <button class="btn btn-sm btn-dark mt-3 mb-2">Delete</button>
+            </form>
+            <% } %>
+          </div>
+          <% } %>
+        </div>
+        <% } %>
       </div>
     </div>
   </div>
-  
+
+    <% if (hasMap) { %>
     <div class="row mt-4">
       <div class="col-8 offset-2">
         <h3>Where You will be</h3>
          <div id="map"></div>
       </div>
     </div>
+    <% } %>
 
 </body>
-<script src="../../public/js/map.js"></script>
+<% if (hasMap) { %>
+<script src="/js/map.js"></script>
+<% } %>

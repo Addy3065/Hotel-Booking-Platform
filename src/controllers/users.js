@@ -4,13 +4,12 @@ module.exports.userSignupForm = (req, res) => {
   res.render("users/signup.ejs");
 };
 
-module.exports.userSignup = async (req, res) => {
+module.exports.userSignup = async (req, res, next) => {
   try {
     // we added a try catch block as we dont want to go to a different error page rather just flash error
     let { username, email, password } = req.body;
     const newUser = new User({ email, username });
     const registeredUser = await User.register(newUser, password);
-    console.log(registeredUser);
     req.login(registeredUser, (err) => {
       if (err) {
         return next(err);
@@ -37,7 +36,7 @@ module.exports.userLogout = (req, res, next) => {
     if (err) {
       return next(err);
     }
+    req.flash("success", "Logged-Out");
+    res.redirect("/listings");
   });
-  req.flash("success", "Logged-Out");
-  res.redirect("/listings");
 };

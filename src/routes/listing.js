@@ -35,18 +35,18 @@ const preserveTitleOnEdit = wrapAsync(async (req, res, next) => {
     req.flash("error", "Listing you are trying to edit does not exist!");
     return res.redirect("/listings");
   }
-  req.body.list.title = existingListing.title;
+  req.body.list = { ...(req.body.list || {}), title: existingListing.title };
   next();
 });
 
-router.get("/:id/edit", isLoggedin, wrapAsync(listingController.renderEdit));
+router.get("/:id/edit", isLoggedin, wrapAsync(isOwner), wrapAsync(listingController.renderEdit));
 
 router.put(
   "/:id",
-  preserveTitleOnEdit,
   isLoggedin,
-  isOwner,
+  wrapAsync(isOwner),
   upload.single("list[image]"),
+  preserveTitleOnEdit, // needs req.body, which multer only fills in after parsing the multipart form
   validateListing, // JOI middleware
   wrapAsync(listingController.updateListing),
 );
@@ -56,7 +56,7 @@ router.put(
 router.delete(
   "/:id",
   isLoggedin,
-  isOwner,
+  wrapAsync(isOwner),
   wrapAsync(listingController.destroyListing),
 );
 

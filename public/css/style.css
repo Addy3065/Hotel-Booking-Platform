@@ -88,3 +88,72 @@ body {
   height: 400px;
   width: 80vh;
 }
+
+/* SEARCH (navbar) */
+.search-form {
+  gap: 0.5rem;
+}
+.search-input {
+  border-radius: 25px !important;
+  padding: 0.5rem 1.25rem;
+  min-width: 18rem;
+}
+.search-btn {
+  background-color: #ff385c !important;
+  color: #fff !important;
+  border-radius: 25px !important;
+  padding: 0 1.25rem;
+  white-space: nowrap;
+}
+.search-btn:hover {
+  background-color: #e02e50 !important;
+}
+
+/* STAR RATING INPUT */
+.star-rating {
+  display: inline-flex;
+  flex-direction: row-reverse; /* radios are rendered 5..1 so siblings after the hovered one are the lower stars */
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.star-rating input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.star-rating label {
+  font-size: 2rem;
+  color: #d3d3d3;
+  cursor: pointer;
+  padding: 0 0.15rem;
+  transition: color 0.15s;
+}
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #ffb400;
+}
+.star-rating input:focus-visible + label {
+  outline: 2px solid #ff385c;
+  border-radius: 4px;
+}
+.was-validated .star-rating:has(input:invalid) ~ .star-feedback {
+  display: block;
+}
+
+/* STAR RATING DISPLAY */
+.star-display .fa-star,
+.avg-rating .fa-star {
+  color: #ffb400;
+}
+.avg-rating {
+  font-size: 1rem;
+  font-weight: 500;
+}
+.review-card {
+  border: 1px solid #ddd !important;
+  border-radius: 1rem;
+  padding: 1rem;
+}

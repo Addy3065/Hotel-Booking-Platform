@@ -25,7 +25,7 @@ router.post(
 router.delete(
   "/:reviewId",
   isLoggedin,
-  isReviewAuthor,
+  wrapAsync(isReviewAuthor),
   wrapAsync(reviewController.destroyRoute),
 );
 

@@ -1,7 +1,13 @@
 <% layout("/layouts/boilerplate")%>
 <body>
+    <% if (location) { %>
+    <h2>Listings in "<%= location %>"</h2>
+    <% if (!allListing.length) { %>
+    <p>No listings found for this location. <a href="/listings">View all listings</a></p>
+    <% } %>
+    <% } else { %>
     <h2>All Listings</h2>
-    
+    <% } %>
     <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1" >
         <% for(let list of allListing){ %>
         <div class="listing-card card" style="width: 18rem;">

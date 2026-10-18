@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const schema = mongoose.Schema;
 const Review = require("./review");
-const review = require("./review");
 
 const listingSchema = new schema({
   title: {
@@ -27,7 +26,7 @@ const listingSchema = new schema({
     type: schema.Types.ObjectId,
     ref: "User",
   },
-  geometr: {
+  geometry: {
     type: {
       type: String, // Don't do `{ location: { type: String } }`
       enum: ["Point"], // 'location.type' must be 'Point'

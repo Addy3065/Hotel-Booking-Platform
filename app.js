@@ -2,7 +2,8 @@
 
 require("dotenv").config();
 
-const dburl = process.env.ATLASDB_URL;
+const dburl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/hotels";
+const sessionSecret = process.env.SECRET || "devsecret";
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -18,7 +19,7 @@ const Review = require("./models/review");
 const listingRouter = require("./src/routes/listing.js");
 const reviewRouter = require("./src/routes/reviews.js");
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const { MongoStore } = require("connect-mongo"); // connect-mongo v6 exports MongoStore as a named export
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -34,10 +35,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.engine("ejs", ejsMate);
 
-app.listen(8080, () => {
-  console.log("app is listening at port 8080");
-});
-
 async function main() {
   await mongoose.connect(dburl);
 }
@@ -49,13 +46,14 @@ main()
     console.log(err);
   });
 
+// home page -> listed hotels
 app.get("/", (req, res) => {
-  res.send("WORKING");
+  res.redirect("/listings");
 });
 const store = MongoStore.create({
   mongoUrl: dburl,
   crypto: {
-    secret: process.env.SECRET,
+    secret: sessionSecret,
   },
   touchAfter: 86400,
 });
@@ -64,7 +62,7 @@ store.on("error", () => {
 });
 const sessionOptions = {
   store,
-  secret: process.env.SECRET,
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -91,6 +89,7 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currentUser = req.user;
+  res.locals.searchLocation = req.query.location || "";
   next();
 });
 
@@ -113,8 +112,19 @@ app.all("/*anything", (req, res, next) => {
 });
 
 // ERROR HANDLING MIDDLE WARE
-app.use("/", (err, req, res, next) => {
+app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something Went Wrong" } = err;
+  if (err.name === "CastError") {
+    // malformed id in the url, e.g. /listings/123
+    statusCode = 404;
+    err.message = "Page Not Found!";
+  }
+  if (!err.message) err.message = message;
   res.status(statusCode).render("error.ejs", { err });
   // res.status(statusCode).send(message);
+});
+
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  console.log(`app is listening at port ${port}`);
 });

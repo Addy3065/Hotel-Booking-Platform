@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top border-bottom">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/"><i class="fa-brands fa-airbnb"></i></a>
+    <a class="navbar-brand" href="/listings"><i class="fa-brands fa-airbnb"></i></a>
     <button
       class="navbar-toggler"
       type="button"
@@ -15,6 +15,20 @@
         <a class="nav-link" href="/listings/new">New</a>
         <!-- <a class="nav-link" href="#">Pricing</a> -->
       </div>
+      <!-- search listings by location -->
+      <form class="d-flex search-form mx-lg-auto" role="search" method="GET" action="/listings">
+        <input
+          class="form-control search-input"
+          type="search"
+          name="location"
+          placeholder="Search by location"
+          aria-label="Search by location"
+          value="<%= searchLocation %>"
+        />
+        <button class="btn search-btn" type="submit">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+      </form>
       <div class="navbar-nav ms-auto">
         <% if(!currentUser){ %>
         <a class="nav-link active" href="/signup">Sign-Up</a>
