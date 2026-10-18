@@ -1,9 +1,5 @@
 <%layout("/layouts/boilerplate") %>
 <% const hasMap = list.geometry && list.geometry.coordinates && list.geometry.coordinates.length === 2; %>
-<script>
-  const mapToken = "<%= process.env.MAP_TOKEN || '' %>";
-  const coordinates = <%- JSON.stringify(hasMap ? list.geometry.coordinates : null) %>;
-</script>
 <body>
   <div class="row mt-4">
     <div class="col-8 offset-2">
@@ -132,7 +128,11 @@
     <div class="row mt-4">
       <div class="col-8 offset-2">
         <h3>Where You will be</h3>
-         <div id="map"></div>
+         <div
+          id="map"
+          data-map-token="<%= process.env.MAP_TOKEN || '' %>"
+          data-coordinates="<%= JSON.stringify(list.geometry.coordinates) %>"
+        ></div>
       </div>
     </div>
     <% } %>

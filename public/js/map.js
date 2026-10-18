@@ -1,4 +1,8 @@
-// mapToken and coordinates are set by views/listings/show.ejs
+// mapToken and coordinates come from the #map element's data attributes in views/listings/show.ejs
+const mapEl = document.getElementById("map");
+const mapToken = mapEl.dataset.mapToken;
+const coordinates = JSON.parse(mapEl.dataset.coordinates);
+
 mapboxgl.accessToken = mapToken;
 const map = new mapboxgl.Map({
   container: "map", // container ID
