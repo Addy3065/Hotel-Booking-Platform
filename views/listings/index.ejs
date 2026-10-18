@@ -14,6 +14,16 @@
             <img src="<%=list.image.url%>" class="card-img-top" alt="Listing's Image" style="height: 20rem;">
             <div class=" card-body ">
                 <h5 class="card-title"><%=list.title%></h5>
+                <% const ratings = list.reviews.filter((r) => r && r.rating); %>
+                <p class="star-display mb-1">
+                    <% if (ratings.length) { %>
+                    <i class="fa-solid fa-star"></i>
+                    <%= (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1) %>/5
+                    <span class="text-muted">(<%= ratings.length %>)</span>
+                    <% } else { %>
+                    <span class="text-muted">No ratings yet</span>
+                    <% } %>
+                </p>
                 <p class="card-text"><%= list.description%> </p>
                 <div class="d-flex justify-content-between align-items-center mt-auto">
                    <a href="/listings/<%=list._id%>" class="btn btn-primary">View</a>

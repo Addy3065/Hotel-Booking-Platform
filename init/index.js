@@ -2,6 +2,7 @@ require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const mongoose = require("mongoose");
 const initData = require("./data");
 const Listing = require("../models/listings");
+const User = require("../models/users");
 
 const dburl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/hotels";
 
@@ -40,10 +41,19 @@ const initDB = async () => {
   await mongoose.connect(dburl);
   console.log("Mongo Connected");
   await Listing.deleteMany({});
+  // demo account that owns the sample listings (login: demo / demo1234), unless SEED_OWNER_ID is given
+  let ownerId = process.env.SEED_OWNER_ID;
+  if (!ownerId) {
+    let demoUser = await User.findOne({ username: "demo" });
+    if (!demoUser) {
+      demoUser = await User.register(new User({ username: "demo", email: "demo@example.com" }), "demo1234");
+    }
+    ownerId = demoUser._id;
+  }
   // reinitialize data to add owner attribute to data
   initData.data = initData.data.map((obj) => ({
     ...obj,
-    owner: process.env.SEED_OWNER_ID || "6a7f0ece0eb9c4c69bc33a7c",
+    owner: ownerId,
     geometry: { type: "Point", coordinates: coordinates[obj.location] || [0, 0] },
   }));
   await Listing.insertMany(initData.data);

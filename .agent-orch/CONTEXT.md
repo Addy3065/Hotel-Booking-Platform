@@ -19,6 +19,7 @@ _Durable knowledge for every agent session: architecture, conventions, decisions
 ## Gotchas
 - connect-mongo v6: use `const { MongoStore } = require("connect-mongo")`.
 - Express 5 leaves req.body undefined for multipart until multer runs: middleware reading req.body must come after `upload.single(...)`.
-- Listing `geometry` is required, so seed data carries coordinates; creating listings needs MAP_TOKEN (Mapbox client is only built when the token exists).
+- Listing `geometry` is required. `utils/geocode.js` uses Mapbox when MAP_TOKEN is set, else OSM Nominatim; show page backfills missing geometry. Mapbox GL v3 renders nothing without a token, so map.js falls back to Leaflet (CDN, loaded only when no token) + OSM tiles.
+- `node init/index.js` wipes listings and creates/reuses user demo/demo1234 as owner.
 - `systemctl reload caddy` fails on this box (PrivateTmp namespace error); use `sudo caddy reload --config /etc/caddy/Caddyfile`.
 - Port 8090 on this server is used by another app; test on another port.

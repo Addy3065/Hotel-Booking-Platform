@@ -86,7 +86,8 @@ body {
 }
 #map {
   height: 400px;
-  width: 80vh;
+  width: 100%;
+  border-radius: 1rem;
 }
 
 /* SEARCH (navbar) */
@@ -145,6 +146,7 @@ body {
 
 /* STAR RATING DISPLAY */
 .star-display .fa-star,
+.star-display .fa-star-half-stroke,
 .avg-rating .fa-star {
   color: #ffb400;
 }

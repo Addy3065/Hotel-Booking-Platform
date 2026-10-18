@@ -1,9 +1,6 @@
 const Listing = require("../../models/listings");
 const expressError = require("../../utils/expressError");
-const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
-const mapToken = process.env.MAP_TOKEN;
-// the mapbox client throws without a token, so only create it when one is configured
-const geocodingClient = mapToken ? mbxGeocoding({ accessToken: mapToken }) : null;
+const geocode = require("../../utils/geocode");
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -15,7 +12,8 @@ module.exports.index = async (req, res) => {
     const regex = new RegExp(escapeRegex(location), "i");
     filter = { $or: [{ location: regex }, { country: regex }] };
   }
-  const allListing = await Listing.find(filter);
+  // only the ratings are needed to show each listing's average on the cards
+  const allListing = await Listing.find(filter).populate("reviews", "rating");
   res.render("listings/index.ejs", { allListing, location });
 };
 
@@ -36,6 +34,18 @@ module.exports.showListings = async (req, res) => {
     req.flash("error", "Listing Does Not Exist!");
     return res.redirect("/listings");
   }
+  // older listings (e.g. seeded before geometry was saved) have no coordinates: look them up once and store them
+  if (!list.geometry || !list.geometry.coordinates || list.geometry.coordinates.length !== 2) {
+    try {
+      const geometry = await geocode(`${list.location}, ${list.country}`);
+      if (geometry) {
+        list.geometry = geometry;
+        await Listing.updateOne({ _id: list._id }, { geometry });
+      }
+    } catch (err) {
+      console.log("geocoding failed:", err.message);
+    }
+  }
   // console.log(list);
   res.render("listings/show.ejs", { list });
 };
@@ -44,16 +54,8 @@ module.exports.createListing = async (req, res) => {
   if (!req.file) {
     throw new expressError(400, "Please upload an image of the property");
   }
-  let response = geocodingClient
-    ? await geocodingClient
-        .forwardGeocode({
-          query: `${req.body.list.location}, ${req.body.list.country}`,
-          limit: 1,
-        })
-        .send()
-    : null;
-  const feature = response && response.body.features[0];
-  if (!feature) {
+  const geometry = await geocode(`${req.body.list.location}, ${req.body.list.country}`);
+  if (!geometry) {
     throw new expressError(400, "Could not find that location on the map");
   }
 
@@ -63,7 +65,7 @@ module.exports.createListing = async (req, res) => {
   let newList = new Listing(list);
   newList.owner = req.user._id;
   newList.image = { url, filename };
-  newList.geometry = feature.geometry;
+  newList.geometry = geometry;
   let savedListing = await newList.save();
   req.flash("success", "New Listing Added!");
   res.redirect("/listings");
@@ -85,6 +87,11 @@ module.exports.updateListing = async (req, res) => {
   if (!listing) {
     req.flash("error", "Listing Does Not Exist!");
     return res.redirect("/listings");
+  }
+  // keep the map pin in sync when the address changes
+  if (listing.location !== req.body.list.location || listing.country !== req.body.list.country) {
+    const geometry = await geocode(`${req.body.list.location}, ${req.body.list.country}`);
+    if (geometry) await Listing.updateOne({ _id: id }, { geometry });
   }
   if (typeof req.file !== "undefined") {
     let url = req.file.path;
